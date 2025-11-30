@@ -5,6 +5,7 @@ taban_df <- read_excel("taban_Collection_Data.xlsx", sheet = "count_data")
 View(taban_df)
 
 #factorize categorical data
+taban_df$rep <- as.factor(taban_df)
 taban_df$site <- as.factor(taban_df$site)
 taban_df$type <- as.factor(taban_df$type)
 
