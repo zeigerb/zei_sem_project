@@ -93,18 +93,22 @@ library(lme4)
 ##need something that can handle NegBin GLMM----
 
 
-flies_GLMM <- glmer.nb(count ~ AvgTemp + location + (1|site) + (1|rep), data = flies)
+temp_GLMM <- glmer.nb(count ~ AvgTemp + location + (1|site) + (1|rep), data = flies)
+
 CDD_GLMM <- glmer.nb(count ~ AvgCDD + location + (1|site) + (1|rep), data = flies)
 GDD_GLMM <- glmer.nb(count ~ AvgGDD + location + (1|site) + (1|rep), data = flies)
 
-AIC(flies_GLMM, GDD_GLMM, CDD_GLMM)
+AIC(temp_GLMM, GDD_GLMM, CDD_GLMM)
 
-summary(flies_GLMM)
+summary(temp_GLMM)
 
-##plotting predict?----
+
+##plotting prediction?----
+
+predict_GLMM <- glmer.nb(count ~ AvgTemp + (1|location) + (1|site) + (1|rep), data = flies)
 
 new_data_GLMM <- data.frame(AvgTemp = seq(9, 25, 0.001))
-new_data_GLMM$Predicted_flies_GLMM <- predict(flies_GLMM,
+new_data_GLMM$Predicted_temp_GLMM <- predict(predict_GLMM,
                                                   type = "response",
                                                   newdata = new_data_GLMM,
                                                   re.form = NA)
@@ -113,9 +117,9 @@ new_data_GLMM$Predicted_flies_GLMM <- predict(flies_GLMM,
 ggplot(data=flies, mapping = aes(x=AvgTemp, y=count)) +
   geom_point()+theme_classic()+
   geom_line(data=new_data_GLMM,
-            aes(x=AvgTemp, y=Predicted_flies_GLMM), linewidth=1)
+            aes(x=AvgTemp, y=Predicted_temp_GLMM), linewidth=1)
 
 logflies <- new_data_GLMM
-logflies$transform <- log(logflies$Predicted_flies_GLMM)
+logflies$transform <- log(logflies$Predicted_temp_GLMM)
 
 plot(x = logflies$AvgTemp, y = logflies$transform)
