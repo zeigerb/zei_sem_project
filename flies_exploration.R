@@ -42,6 +42,9 @@ plot(count ~ AvgTemp, data = flies, pch = 19)
 #boxplot of count vs trap placement location
 boxplot(flies$count ~ flies$location)
 
+ggplot(data = flies, mapping = aes(x = location, y = count)) +
+  geom_boxplot()
+
 ##test models----
 
 fliesGDD_poisson <- glm(formula = count ~ AvgGDD + location, family = poisson(link = "log"),
@@ -68,7 +71,7 @@ dispersiontest(fliesTemp_poisson)
 dispersiontest(fliesGDD_poisson)
 dispersiontest(fliesCDD_poisson)
 
-###better fit a NBin model----
+###better fit a NB model----
 
 library(MASS)
 
@@ -76,7 +79,7 @@ fliesTemp_negbin <- glm.nb(formula = count ~ AvgTemp + location,
                            data = flies)
 summary(fliesTemp_negbin)
 
-###and test for zero-inflation----
+###test for zero-inflation----
 
 library(pscl)
 
@@ -89,8 +92,6 @@ AIC(fliesTemp_negbin, fliesTemp_ZINB)
 ##fitting a NegBin GLMM----
 
 library(lme4)
-
-##need something that can handle NegBin GLMM----
 
 
 temp_GLMM <- glmer.nb(count ~ AvgTemp + location + (1|site) + (1|rep), data = flies)
@@ -117,9 +118,13 @@ new_data_GLMM$Predicted_temp_GLMM <- predict(predict_GLMM,
 ggplot(data=flies, mapping = aes(x=AvgTemp, y=count)) +
   geom_point()+theme_classic()+
   geom_line(data=new_data_GLMM,
-            aes(x=AvgTemp, y=Predicted_temp_GLMM), linewidth=1)
+            aes(x=AvgTemp, y=Predicted_temp_GLMM),
+            size = 0.5)
 
 logflies <- new_data_GLMM
-logflies$transform <- log(logflies$Predicted_temp_GLMM)
+logflies$log_transformed_values <- log(logflies$Predicted_temp_GLMM)
 
 plot(x = logflies$AvgTemp, y = logflies$transform)
+
+ggplot(data = logflies, mapping = aes(x = AvgTemp, y = log_transformed_values)) +
+  geom_line()
